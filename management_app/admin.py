@@ -39,7 +39,7 @@ class ProjectFileAdmin(admin.ModelAdmin):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    search_fields = ('name',)
+    search_fields = ('name', 'title')
     list_display = (
         'name',
         'project',
