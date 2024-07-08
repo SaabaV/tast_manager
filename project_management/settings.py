@@ -30,6 +30,10 @@ DEBUG = env.bool('DEBUG', True)
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', [])
 
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'management_app.pagination.GlobalPagination',
+    'PAGE_SIZE': 5,
+}
 
 # Application definition
 

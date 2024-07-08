@@ -4,6 +4,12 @@ from management_app.models.task import SubTask, Category
 import datetime
 
 
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+
 class AllTasksSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task

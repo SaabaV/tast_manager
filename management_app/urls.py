@@ -1,5 +1,5 @@
-from django.urls import path
-
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from management_app.views import (
     get_all_projects,
     get_all_tags,
@@ -9,8 +9,12 @@ from management_app.views import (
     TaskListView,
     TaskStatsView,
     SubTaskListCreateView,
-    SubTaskDetailUpdateDeleteView
+    SubTaskDetailUpdateDeleteView,
+    CategoryViewSet
 )
+
+router = DefaultRouter()
+router.register(r'categories', CategoryViewSet)
 
 urlpatterns = [
     path('projects/', get_all_projects),
@@ -21,6 +25,7 @@ urlpatterns = [
     path('tasks/stats/', TaskStatsView.as_view(), name='task-stats'),
     path('tags/', get_all_tags),
     path('tags/<int:pk>/', get_tag_by_id),
-    path('tags/create/', create_new_tag)
+    path('tags/create/', create_new_tag),
+    path('', include(router.urls)),
 ]
 

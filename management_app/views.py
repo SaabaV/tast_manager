@@ -1,4 +1,4 @@
-from rest_framework.response import Response
+#management_app/views.py
 from rest_framework.request import Request
 from rest_framework.decorators import api_view
 from rest_framework import status
@@ -14,8 +14,24 @@ from management_app.models import Project, Tag
 from management_app.serializers.projects import AllProjectsSerializer
 from management_app.serializers.tags import AllTagsSerializer
 from .models import Task
-from models.task import SubTask
-from serializers.tasks import AllTasksSerializer, SubTaskCreateSerializer
+from .models.task import SubTask
+from .serializers.tasks import AllTasksSerializer, SubTaskCreateSerializer
+
+from rest_framework.decorators import action
+from rest_framework import viewsets
+from .models.task import Category
+from .serializers.tasks import CategorySerializer
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+    @action(detail=True, methods=['get'])
+    def count_tasks(self, request, pk=None):
+        category = self.get_object()
+        task_count = Task.objects.filter(category=category).count()
+        return Response({'task_count': task_count})
 
 
 @api_view(["GET"])
@@ -102,6 +118,7 @@ class SubTaskListCreateView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class SubTaskDetailUpdateDeleteView(APIView):
     def get_object(self, pk):
