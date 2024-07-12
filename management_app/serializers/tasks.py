@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from management_app.models import Task
 from management_app.models.task import SubTask, Category
-import datetime
+from django.utils import timezone
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -13,7 +13,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class AllTasksSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ("id", "name", "status", "priority")
+        fields = ["id", "name", "description", "status", "priority", "project", "tags", "due_date", "created_date", "updated_at"]
 
 
 class SubTaskCreateSerializer(serializers.ModelSerializer):
@@ -63,9 +63,9 @@ class TaskDetailSerializer(serializers.ModelSerializer):
 class TaskCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at']
+        fields = ['id', 'name', 'description', 'status', 'due_date', 'created_date', 'project']
 
     def validate_deadline(self, value):
-        if value < datetime.now():
+        if value < timezone.now():
             raise serializers.ValidationError("The deadline cannot be in the past.")
         return value

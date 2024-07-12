@@ -26,6 +26,7 @@ urlpatterns = [
     path('tags/', get_all_tags),
     path('tags/<int:pk>/', get_tag_by_id),
     path('tags/create/', create_new_tag),
-    path('', include(router.urls)),
+    path('', include(router.urls)),  # добавьте эту строку для включения маршрутов роутера
 ]
+
 

@@ -1,4 +1,5 @@
-#management_app/views.py
+# management_app/views.py
+
 from rest_framework.request import Request
 from rest_framework.decorators import api_view
 from rest_framework import status
@@ -22,17 +23,18 @@ from rest_framework import viewsets
 from .models.task import Category
 from .serializers.tasks import CategorySerializer
 
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated]
 
     @action(detail=True, methods=['get'])
     def count_tasks(self, request, pk=None):
         category = self.get_object()
         task_count = Task.objects.filter(category=category).count()
         return Response({'task_count': task_count})
-
 
 @api_view(["GET"])
 def get_all_projects(request: Request) -> Response:
@@ -67,7 +69,7 @@ def get_all_tags(request: Request) -> Response:
     return Response(data=serialize.data, status=status.HTTP_200_OK)
 
 
-@api_view(["Get"])
+@api_view(["GET"])
 def get_tag_by_id(request: Request, pk: int) -> Response:
     try:
         tag_by_id = Tag.objects.get(pk=pk)
@@ -81,6 +83,7 @@ def get_tag_by_id(request: Request, pk: int) -> Response:
 class TaskCreateView(generics.CreateAPIView):
     queryset = Task.objects.all()
     serializer_class = AllTasksSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class TaskListView(generics.ListAPIView):
@@ -90,9 +93,12 @@ class TaskListView(generics.ListAPIView):
     filterset_fields = ['status', 'deadline']
     ordering_fields = ['deadline']
     ordering = ['deadline']
+    permission_classes = [IsAuthenticated]
 
 
 class TaskStatsView(APIView):
+    permission_classes = [IsAdminUser]
+
     def get(self, request, *args, **kwargs):
         total_tasks = Task.objects.count()
         status_counts = Task.objects.values('status').annotate(count=Count('status'))
@@ -107,6 +113,8 @@ class TaskStatsView(APIView):
 
 
 class SubTaskListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         subtasks = SubTask.objects.all()
         serializer = SubTaskCreateSerializer(subtasks, many=True)
@@ -121,6 +129,8 @@ class SubTaskListCreateView(APIView):
 
 
 class SubTaskDetailUpdateDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get_object(self, pk):
         try:
             return SubTask.objects.get(pk=pk)
