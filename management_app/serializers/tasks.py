@@ -11,17 +11,20 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class AllTasksSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+
     class Meta:
         model = Task
-        fields = ["id", "name", "description", "status", "priority", "project", "tags", "due_date", "created_date", "updated_at"]
+        fields = ["id", "name", "description", "status", "priority", "project", "tags", "due_date", "created_date", "updated_at", "owner"]
 
 
 class SubTaskCreateSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
     created_at = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = SubTask
-        fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at']
+        fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at', 'owner']
 
 
 class CategoryCreateSerializer(serializers.ModelSerializer):
@@ -50,20 +53,21 @@ class CategoryCreateSerializer(serializers.ModelSerializer):
 class SubTaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubTask
-        fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at']
+        fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at', 'owner']
+
 
 class TaskDetailSerializer(serializers.ModelSerializer):
     subtasks = SubTaskSerializer(many=True, read_only=True)
 
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at', 'subtasks']
+        fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at', 'subtasks', 'owner']
 
 
 class TaskCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ['id', 'name', 'description', 'status', 'due_date', 'created_date', 'project']
+        fields = ['id', 'name', 'description', 'status', 'due_date', 'created_date', 'project', 'owner']
 
     def validate_deadline(self, value):
         if value < timezone.now():

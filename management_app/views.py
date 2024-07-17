@@ -22,8 +22,10 @@ from rest_framework.decorators import action
 from rest_framework import viewsets
 from .models.task import Category
 from .serializers.tasks import CategorySerializer
+from management_app.permissions import IsOwner
 
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -35,6 +37,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
         category = self.get_object()
         task_count = Task.objects.filter(category=category).count()
         return Response({'task_count': task_count})
+
 
 @api_view(["GET"])
 def get_all_projects(request: Request) -> Response:
@@ -85,6 +88,9 @@ class TaskCreateView(generics.CreateAPIView):
     serializer_class = AllTasksSerializer
     permission_classes = [IsAuthenticated]
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
 
 class TaskListView(generics.ListAPIView):
     queryset = Task.objects.all()
@@ -123,13 +129,13 @@ class SubTaskListCreateView(APIView):
     def post(self, request):
         serializer = SubTaskCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(owner=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SubTaskDetailUpdateDeleteView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwner]
 
     def get_object(self, pk):
         try:
@@ -160,3 +166,13 @@ class SubTaskDetailUpdateDeleteView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         subtask.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UserTaskListView(generics.ListAPIView):
+    serializer_class = AllTasksSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Task.objects.filter(owner=self.request.user)
+
+
